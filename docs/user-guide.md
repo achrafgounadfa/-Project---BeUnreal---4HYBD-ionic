@@ -8,9 +8,8 @@ BeUnreal est une application mobile de partage de moments authentiques qui vous 
 
 ### Installation
 
-1. **Android** : Téléchargez l'application depuis le Google Play Store
-2. **iOS** : Téléchargez l'application depuis l'App Store
-3. **Web** : Accédez à l'application via https://beunreal.app
+1. **Android** : Téléchargez l'application 
+2. **Web** : Accédez à l'application via https://beunreal.app
 
 ### Création de compte
 
@@ -186,6 +185,6 @@ BeUnreal est une application mobile de partage de moments authentiques qui vous 
 ## Assistance
 
 Si vous rencontrez des problèmes non résolus par ce guide, vous pouvez :
-- Consulter notre centre d'aide en ligne à l'adresse help.beunreal.app
-- Nous contacter par email à support@beunreal.app
+- Consulter notre centre d'aide en ligne à l'adresse achraf.gounadfa@supinfo.com 
+- Nous contacter par email à achraf.gounadfa@supinfo.com 
 - Signaler un bug via l'application dans Profil > Paramètres > Assistance > Signaler un problème
