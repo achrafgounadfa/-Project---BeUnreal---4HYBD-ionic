@@ -1,0 +1,242 @@
+.stories-container {
+  padding: 10px;
+}
+
+/* Style des cercles de stories inspiré d'Instagram */
+.story-circles {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 0;
+  margin-bottom: 15px;
+  scrollbar-width: none; /* Pour Firefox */
+}
+
+.story-circles::-webkit-scrollbar {
+  display: none; /* Pour Chrome, Safari et Opera */
+}
+
+.story-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 15px;
+  position: relative;
+}
+
+.story-avatar-border {
+  padding: 3px;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-radius: 50%;
+  margin-bottom: 5px;
+}
+
+.story-avatar-border.viewed {
+  background: #e0e0e0;
+}
+
+.story-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+.story-username {
+  font-size: 12px;
+  color: #262626;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+/* Style des stories en plein écran */
+.story-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.story-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  color: white;
+  z-index: 1001;
+}
+
+.story-progress-container {
+  display: flex;
+  width: 100%;
+  padding: 5px 10px;
+}
+
+.story-progress-bar {
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.3);
+  flex-grow: 1;
+  margin: 0 2px;
+  position: relative;
+}
+
+.story-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: white;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.story-content {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.story-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.story-video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.story-caption {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  padding: 10px 20px;
+  color: white;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.story-location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5px;
+  font-size: 14px;
+  color: white;
+}
+
+.story-timestamp {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+/* Animations de transition entre les stories */
+.story-transition-enter {
+  transform: translateX(100%);
+}
+
+.story-transition-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms ease-in-out;
+}
+
+.story-transition-exit {
+  transform: translateX(0);
+}
+
+.story-transition-exit-active {
+  transform: translateX(-100%);
+  transition: transform 300ms ease-in-out;
+}
+
+/* Style des cartes de stories dans le flux */
+.story-card {
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.story-card-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.story-card-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.story-card-info {
+  flex-grow: 1;
+}
+
+.story-card-username {
+  font-weight: bold;
+  margin: 0;
+}
+
+.story-card-location {
+  font-size: 12px;
+  color: #8e8e8e;
+  margin: 0;
+}
+
+.story-card-media {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+}
+
+.story-card-actions {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.story-card-action {
+  margin-right: 15px;
+  color: #262626;
+}
+
+/* Animations pour les transitions de page */
+.page-transition-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}

@@ -1,0 +1,237 @@
+/* Styles globaux pour l'application BeUnreal */
+
+/* Styles pour la barre de navigation et le bouton caméra central */
+.camera-fab {
+  margin-bottom: 0.5rem;
+  z-index: 999;
+}
+
+/* Styles pour les stories en haut de l'écran */
+.stories-row {
+  display: flex;
+  overflow-x: auto;
+  padding: 1rem 0.5rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.stories-row::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.story-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0.5rem;
+  cursor: pointer;
+}
+
+.story-avatar-border {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.story-avatar-border.viewed {
+  background: #e0e0e0;
+}
+
+.story-avatar {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+.story-username {
+  font-size: 0.8rem;
+  text-align: center;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Styles pour les conversations dans la liste des messages */
+.conversation-list {
+  padding: 0;
+}
+
+.conversation-item {
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+}
+
+.conversation-avatar-container {
+  position: relative;
+  margin-right: 1rem;
+}
+
+.conversation-avatar {
+  width: 50px;
+  height: 50px;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #dc2743;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.conversation-name {
+  margin: 0;
+  font-weight: bold;
+}
+
+.conversation-time {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.conversation-message {
+  margin: 0;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Styles pour la carte de géolocalisation */
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+.location-marker {
+  color: #dc2743;
+  font-size: 2rem;
+}
+
+/* Styles pour les cartes de stories */
+.story-card {
+  margin: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.story-card-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+}
+
+.story-card-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+}
+
+.story-card-info {
+  flex: 1;
+}
+
+.story-card-username {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.story-card-location {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+
+.story-card-media {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+}
+
+.story-card-actions {
+  display: flex;
+  padding: 0.5rem;
+}
+
+.story-card-action {
+  margin-right: 0.5rem;
+}
+
+.story-caption {
+  padding: 0 1rem 1rem;
+  margin: 0;
+}
+
+/* Styles pour l'affichage plein écran des stories */
+.story-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.story-close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.story-fullscreen-image {
+  max-width: 100%;
+  max-height: 80%;
+  object-fit: contain;
+}
+
+.story-fullscreen-caption {
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  max-width: 80%;
+}
+
+.story-fullscreen-navigation {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 2rem;
+  position: absolute;
+  bottom: 2rem;
+}

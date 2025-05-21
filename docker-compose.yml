@@ -1,0 +1,76 @@
+version: '3'
+services:
+  # Service d'authentification
+  auth-service:
+    build: ./backend/auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGODB_URI=mongodb+srv://achrafgounadfa321:FiUbZoRWsCydDHVP@cluster0.na64kbn.mongodb.net/beunreal-auth?retryWrites=true&w=majority&appName=Cluster0
+      - PORT=3001
+      - JWT_SECRET=beunreal_2025_dev_secret_key!
+      - JWT_EXPIRES_IN=86400
+    volumes:
+      - ./backend/auth-service:/app
+      - /app/node_modules
+    restart: unless-stopped
+  # Service de gestion des utilisateurs
+  user-service:
+    build: ./backend/user-service
+    ports:
+      - "3002:3002"
+    environment:
+      - MONGODB_URI=mongodb+srv://achrafgounadfa321:FiUbZoRWsCydDHVP@cluster0.na64kbn.mongodb.net/beunreal-user?retryWrites=true&w=majority&appName=Cluster0
+      - PORT=3002
+      - JWT_SECRET=beunreal_2025_dev_secret_key!
+    volumes:
+      - ./backend/user-service:/app
+      - /app/node_modules
+    restart: unless-stopped
+  # Service de messagerie
+  message-service:
+    build: ./backend/message-service
+    ports:
+      - "3003:3003"
+    environment:
+      - MONGODB_URI=mongodb+srv://achrafgounadfa321:FiUbZoRWsCydDHVP@cluster0.na64kbn.mongodb.net/beunreal-message?retryWrites=true&w=majority&appName=Cluster0
+      - PORT=3003
+      - JWT_SECRET=beunreal_2025_dev_secret_key!
+      - CLOUDINARY_CLOUD_NAME=dvusswt2u
+      - CLOUDINARY_API_KEY=556833756369351
+      - CLOUDINARY_API_SECRET=6VbDH6b0Si0GZSf0uugSrsMo254
+    volumes:
+      - ./backend/message-service:/app
+      - /app/node_modules
+    restart: unless-stopped
+  # Service de stories
+  story-service:
+    build: ./backend/story-service
+    ports:
+      - "3004:3004"
+    environment:
+      - MONGODB_URI=mongodb+srv://achrafgounadfa321:FiUbZoRWsCydDHVP@cluster0.na64kbn.mongodb.net/beunreal-story?retryWrites=true&w=majority&appName=Cluster0
+      - PORT=3004
+      - JWT_SECRET=beunreal_2025_dev_secret_key!
+      - CLOUDINARY_CLOUD_NAME=dvusswt2u
+      - CLOUDINARY_API_KEY=556833756369351
+      - CLOUDINARY_API_SECRET=6VbDH6b0Si0GZSf0uugSrsMo254
+    volumes:
+      - ./backend/story-service:/app
+      - /app/node_modules
+    restart: unless-stopped
+  # Frontend Ionic/React
+  frontend:
+    build: ./frontend/beunreal-app
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./frontend/beunreal-app:/app
+      - /app/node_modules
+    depends_on:
+      - auth-service
+      - user-service
+      - message-service
+      - story-service
+    command: ionic serve --external --host=0.0.0.0
+    restart: unless-stopped

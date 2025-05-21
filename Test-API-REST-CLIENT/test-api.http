@@ -1,0 +1,43 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MmQyNzAzMzYxNWE0ZGJjY2EwMWU1YSIsImVtYWlsIjoiYWNocmFmQGV4YW1wbGUuY29tIiwidXNlcm5hbWUiOiJBY2hyYWYiLCJpYXQiOjE3NDc3OTE2NDcsImV4cCI6MTc0NzgyMzE4M30.Xhu-ZX-iWU7TBQtzcuUrsQmUAWaQaii3rZft4ozjRsE
+@user_id = 682d27033615a4dbcca01e5a
+
+### 👤 Récupérer un utilisateur
+GET http://localhost:3002/api/users/{{user_id}}
+Authorization: Bearer {{token}}
+
+### 👤 Modifier un utilisateur
+PUT http://localhost:3002/api/users/{{user_id}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "AchrafModifié",
+  "profilePicture": "https://www.letarmac.fr/image-libre-de-droit-gratuite-meilleurs-sites/"
+}
+
+### 👥 Ajouter un ami
+POST http://localhost:3002/api/users/{{user_id}}/friends
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "friendId": "682d27033615a4dbcca01e5a"
+}
+
+### 📬 Envoyer un message
+POST http://localhost:3003/api/messages/send
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "receiverId": "682d27033615a4dbcca01e5a",
+  "content": "Salut Achraf !"
+}
+
+### 📍 Récupérer les stories à proximité
+GET http://localhost:3004/api/stories/nearby?latitude=48.8566&longitude=2.3522&radius=5000
+Authorization: Bearer {{token}}
+
+
+
+### 📍 envoyer message avec image

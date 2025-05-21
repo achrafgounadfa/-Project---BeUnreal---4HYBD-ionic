@@ -1,0 +1,489 @@
+{
+  "info": {
+    "_postman_id": "e5f3a2b1-c8d4-4e5f-a6b7-c8d9e0f1a2b3",
+    "name": "BeUnreal API",
+    "description": "Collection pour l'API BeUnreal",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth Service",
+      "item": [
+        {
+          "name": "Inscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"test@example.com\",\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/auth/signup",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "api",
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Inscription d'un nouvel utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Connexion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Connexion d'un utilisateur existant"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints pour l'authentification"
+    },
+    {
+      "name": "User Service",
+      "item": [
+        {
+          "name": "Récupérer un utilisateur",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/api/users/{{userId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Récupérer les informations d'un utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Mettre à jour un utilisateur",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"nouveau_nom\",\n    \"profilePicture\": \"https://example.com/image.jpg\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/api/users/{{userId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Mettre à jour les informations d'un utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Supprimer un utilisateur",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/api/users/{{userId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Supprimer un utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Rechercher un utilisateur par email",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/api/users/find?email=test@example.com",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "api",
+                "users",
+                "find"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "test@example.com"
+                }
+              ]
+            },
+            "description": "Rechercher un utilisateur par son email"
+          },
+          "response": []
+        },
+        {
+          "name": "Ajouter un ami",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"friendId\": \"{{friendId}}\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/api/users/{{userId}}/friends",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "api",
+                "users",
+                "{{userId}}",
+                "friends"
+              ]
+            },
+            "description": "Ajouter un ami à la liste d'amis"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints pour la gestion des utilisateurs"
+    },
+    {
+      "name": "Message Service",
+      "item": [
+        {
+          "name": "Envoyer un message individuel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "receiverId",
+                  "value": "{{receiverId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "Bonjour, comment ça va ?",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3003/api/messages/send",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "api",
+                "messages",
+                "send"
+              ]
+            },
+            "description": "Envoyer un message individuel"
+          },
+          "response": []
+        },
+        {
+          "name": "Envoyer un message de groupe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "groupId",
+                  "value": "{{groupId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "Bonjour tout le monde !",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3003/api/messages/send-group",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "api",
+                "messages",
+                "send-group"
+              ]
+            },
+            "description": "Envoyer un message de groupe"
+          },
+          "response": []
+        },
+        {
+          "name": "Récupérer les messages d'un utilisateur",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3003/api/messages/{{userId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "api",
+                "messages",
+                "{{userId}}"
+              ]
+            },
+            "description": "Récupérer les messages échangés avec un utilisateur"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints pour la messagerie"
+    },
+    {
+      "name": "Story Service",
+      "item": [
+        {
+          "name": "Créer une story",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "latitude",
+                  "value": "48.8566",
+                  "type": "text"
+                },
+                {
+                  "key": "longitude",
+                  "value": "2.3522",
+                  "type": "text"
+                },
+                {
+                  "key": "mediaType",
+                  "value": "image",
+                  "type": "text"
+                },
+                {
+                  "key": "media",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3004/api/stories",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "api",
+                "stories"
+              ]
+            },
+            "description": "Créer une nouvelle story"
+          },
+          "response": []
+        },
+        {
+          "name": "Récupérer les stories à proximité",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3004/api/stories/nearby?latitude=48.8566&longitude=2.3522&radius=5000",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "api",
+                "stories",
+                "nearby"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "48.8566"
+                },
+                {
+                  "key": "longitude",
+                  "value": "2.3522"
+                },
+                {
+                  "key": "radius",
+                  "value": "5000"
+                }
+              ]
+            },
+            "description": "Récupérer les stories à proximité"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints pour les stories géolocalisées"
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "votre_token_jwt"
+    },
+    {
+      "key": "userId",
+      "value": "id_utilisateur"
+    },
+    {
+      "key": "friendId",
+      "value": "id_ami"
+    },
+    {
+      "key": "receiverId",
+      "value": "id_destinataire"
+    },
+    {
+      "key": "groupId",
+      "value": "id_groupe"
+    }
+  ]
+}

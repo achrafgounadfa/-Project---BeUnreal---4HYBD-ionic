@@ -1,0 +1,161 @@
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  height: 100%;
+}
+
+.message-bubble {
+  max-width: 80%;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 18px;
+  position: relative;
+  word-wrap: break-word;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sent {
+  align-self: flex-end;
+  background-color: #dcf8c6;
+  border-top-right-radius: 0;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.received {
+  align-self: flex-start;
+  background-color: #ffffff;
+  border-top-left-radius: 0;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.message-content {
+  font-size: 16px;
+  color: #303030;
+}
+
+.message-time {
+  font-size: 11px;
+  color: #8c8c8c;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.message-input-container {
+  background-color: #f5f5f5;
+  padding: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.message-input {
+  --background: #ffffff;
+  --padding-start: 15px;
+  --padding-end: 15px;
+  --border-radius: 20px;
+  --placeholder-color: #8c8c8c;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.selected-image-preview {
+  position: relative;
+  margin: 8px;
+  display: inline-block;
+}
+
+.selected-image-preview img {
+  max-height: 100px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.selected-image-preview ion-button {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  --padding-start: 5px;
+  --padding-end: 5px;
+  --padding-top: 5px;
+  --padding-bottom: 5px;
+  --border-radius: 50%;
+  --background: rgba(0, 0, 0, 0.6);
+  --color: white;
+  font-size: 18px;
+}
+
+.message-image-container {
+  margin-bottom: 5px;
+}
+
+.message-image {
+  max-width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+.chat-header {
+  --inner-padding-end: 0;
+  --background: transparent;
+}
+
+/* Indicateurs de statut des messages (style WhatsApp) */
+.message-status {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.status-sent {
+  color: #8c8c8c;
+}
+
+.status-delivered {
+  color: #8c8c8c;
+}
+
+.status-read {
+  color: #4fc3f7;
+}
+
+/* Animation de saisie (style WhatsApp) */
+.typing-indicator {
+  display: flex;
+  padding: 8px 15px;
+  background-color: #ffffff;
+  border-radius: 18px;
+  align-self: flex-start;
+  margin-bottom: 10px;
+  width: fit-content;
+}
+
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  background-color: #b6b6b6;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+  animation: typing 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+  margin-right: 0;
+}
+
+@keyframes typing {
+  0%, 80%, 100% { transform: scale(0.6); }
+  40% { transform: scale(1); }
+}

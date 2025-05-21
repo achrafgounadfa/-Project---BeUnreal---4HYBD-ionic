@@ -1,0 +1,157 @@
+.camera-content {
+  --background: #000;
+}
+
+.camera-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.main-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.front-video {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 30%;
+  height: auto;
+  border: 3px solid #fff;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.hidden-canvas {
+  display: none;
+}
+
+.flash-enabled::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.3);
+  z-index: 5;
+}
+
+.camera-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  z-index: 20;
+}
+
+.capture-button {
+  --border-radius: 50%;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  height: 70px;
+  width: 70px;
+  --background: var(--ion-color-primary);
+  --background-activated: var(--ion-color-primary-shade);
+}
+
+.capture-button.recording {
+  --background: var(--ion-color-danger);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.recording-indicator {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 8px 12px;
+  border-radius: 20px;
+  z-index: 15;
+}
+
+.recording-dot {
+  width: 12px;
+  height: 12px;
+  background-color: var(--ion-color-danger);
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.recording-indicator span {
+  color: white;
+  font-weight: bold;
+}
+
+.captured-media {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.captured-media img,
+.captured-media video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.capture-actions {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  z-index: 20;
+}
+
+.capture-actions ion-button {
+  --border-radius: 50%;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  height: 60px;
+  width: 60px;
+}
+
+.hidden {
+  display: none;
+}

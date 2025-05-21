@@ -1,0 +1,83 @@
+.splash-container {
+  --background: var(--ion-color-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.logo-wrapper {
+  width: 120px;
+  height: 120px;
+  background-color: white;
+  border-radius: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.splash-logo {
+  width: 80px;
+  height: 80px;
+  transition: transform 0.5s ease-in-out;
+}
+
+.scale-up {
+  transform: scale(1.2);
+}
+
+.app-name {
+  margin-top: 16px;
+  transition: transform 0.5s ease-in-out;
+}
+
+.app-name h1 {
+  color: white;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.slide-up {
+  transform: translateY(-10px);
+}
+
+.loading-indicator {
+  margin-top: 32px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 40px;
+  text-align: center;
+}
+
+.footer p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+  margin: 0;
+}
