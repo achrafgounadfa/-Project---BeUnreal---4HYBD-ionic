@@ -1,295 +1,280 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  IonContent, 
-  IonHeader, 
-  IonPage, 
-  IonTitle, 
+import {
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
   IonToolbar,
   IonButton,
   IonIcon,
   IonFab,
   IonFabButton,
-  IonCard,
-  IonCardContent,
+  IonModal,
   IonText,
   IonLoading,
-  IonModal,
-  IonButtons,
-  IonBackButton,
-  IonFooter,
+  IonToast,
   IonTextarea,
-  IonGrid,
-  IonRow,
-  IonCol,
+  IonList,
+  IonItem,
+  IonLabel,
   IonAvatar,
-  IonBadge,
-  IonActionSheet
+  IonCardTitle
 } from '@ionic/react';
-import { 
-  camera, 
-  locationOutline, 
-  happyOutline, 
-  chatbubbleOutline, 
-  timeOutline,
-  closeCircle,
+import {
+  locate,
+  camera,
   heart,
-  thumbsUp,
-  happy,
-  sad,
-  flame,
-  ellipsisHorizontal
+  chatbubble,
+  share
 } from 'ionicons/icons';
-import { GoogleMap } from '@capacitor/google-maps';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import useAuthStore from '../stores/authStore';
 import { storyService } from '../services/api';
+import { Story } from '../services/api/storyService';
 import './StoryMap.css';
 
-interface Story {
-  id: string;
-  userId: {
-    id: string;
-    username: string;
-    profilePicture: string;
-  };
-  mediaUrl: string;
-  mediaType: 'image' | 'video';
-  caption: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  reactions: Array<{
-    userId: string;
-    emoji: string;
-  }>;
-  comments: Array<{
-    userId: {
-      id: string;
-      username: string;
-      profilePicture: string;
-    };
-    content: string;
-    createdAt: string;
-  }>;
-  createdAt: string;
-  expiresAt: string;
-}
+// Composant pour centrer la carte sur la position actuelle
+const LocationMarker: React.FC<{
+  onLocationFound: (lat: number, lng: number) => void
+}> = ({ onLocationFound }) => {
+  const [position, setPosition] = useState<L.LatLng | null>(null);
+  const map = useMap();
 
-const EMOJI_OPTIONS = [
-  { text: 'J\'aime', icon: heart, value: '❤️' },
-  { text: 'Pouce', icon: thumbsUp, value: '👍' },
-  { text: 'Haha', icon: happy, value: '😂' },
-  { text: 'Triste', icon: sad, value: '😢' },
-  { text: 'Feu', icon: flame, value: '🔥' }
-];
+  useEffect(() => {
+    map.locate({ setView: true, maxZoom: 16 });
+  }, [map]);
+
+  useMapEvents({
+    locationfound(e) {
+      setPosition(e.latlng);
+      map.flyTo(e.latlng, map.getZoom());
+      onLocationFound(e.latlng.lat, e.latlng.lng);
+    }
+  });
+
+  return position === null ? null : (
+    <Marker 
+      position={position}
+      icon={new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      } )}
+    >
+      <Popup>Vous êtes ici</Popup>
+    </Marker>
+  );
+};
 
 const StoryMap: React.FC = () => {
   const { user } = useAuthStore();
-  const mapRef = useRef<HTMLElement>();
-  const googleMapRef = useRef<any>(null);
-  
-  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showStoryModal, setShowStoryModal] = useState(false);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [showReactionModal, setShowReactionModal] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [comment, setComment] = useState('');
-  const [showReactionSheet, setShowReactionSheet] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<string>('');
-  
-  useEffect(() => {
-    initMap();
-  }, []);
-  
-  useEffect(() => {
-    if (selectedStory) {
-      updateTimeLeft();
-      const timer = setInterval(updateTimeLeft, 60000); // Mettre à jour chaque minute
-      return () => clearInterval(timer);
-    }
-  }, [selectedStory]);
-  
-  const updateTimeLeft = () => {
-    if (!selectedStory) return;
-    
-    const now = new Date();
-    const expiresAt = new Date(selectedStory.expiresAt);
-    const diffMs = expiresAt.getTime() - now.getTime();
-    
-    if (diffMs <= 0) {
-      setTimeLeft('Expiré');
-      return;
-    }
-    
-    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (diffHrs > 0) {
-      setTimeLeft(`${diffHrs}h ${diffMins}m restantes`);
-    } else {
-      setTimeLeft(`${diffMins} minutes restantes`);
-    }
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastColor, setToastColor] = useState<'success' | 'danger'>('success');
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [storyCaption, setStoryCaption] = useState('');
+  const [isCreatingStory, setIsCreatingStory] = useState(false);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([48.8566, 2.3522]); // Paris par défaut
+  const [mapZoom, setMapZoom] = useState(13);
+  const mapRef = useRef<L.Map | null>(null);
+
+  const handleLocationFound = async (latitude: number, longitude: number) => {
+    setMapCenter([latitude, longitude]);
+    await loadNearbyStories(latitude, longitude);
   };
-  
-  const initMap = async () => {
+
+  const loadNearbyStories = async (latitude: number, longitude: number): Promise<void> => {
     try {
       setIsLoading(true);
-      
-      // Obtenir la position actuelle
-      const position = await Geolocation.getCurrentPosition();
-      const { latitude, longitude } = position.coords;
-      
-      setCurrentLocation({ lat: latitude, lng: longitude });
-      
-      // Initialiser la carte Google Maps
-      if (mapRef.current) {
-        googleMapRef.current = await GoogleMap.create({
-          id: 'story-map',
-          element: mapRef.current,
-          apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY',
-          config: {
-            center: { lat: latitude, lng: longitude },
-            zoom: 13
-          }
-        });
-        
-        // Ajouter un marqueur pour la position actuelle
-        await googleMapRef.current.addMarker({
-          coordinate: { lat: latitude, lng: longitude },
-          title: 'Votre position',
-          snippet: 'Vous êtes ici'
-        });
-        
-        // Charger les stories à proximité
-        await loadNearbyStories(latitude, longitude);
-        
-        // Ajouter un écouteur d'événements pour les clics sur les marqueurs
-        await googleMapRef.current.setOnMarkerClickListener((marker) => {
-          const story = stories.find(s => 
-            s.location.latitude === marker.latitude && 
-            s.location.longitude === marker.longitude
-          );
-          
-          if (story) {
-            setSelectedStory(story);
-            setShowStoryModal(true);
-          }
-        });
-      }
-    } catch (err) {
-      console.error('Erreur lors de l\'initialisation de la carte:', err);
-      setError('Impossible d\'initialiser la carte. Veuillez vérifier vos permissions de localisation.');
+      // Récupérer les stories à proximité
+      const nearbyStories = await storyService.getNearbyStories(latitude, longitude, 5000);
+      setStories(nearbyStories);
+    } catch (err: any) {
+      console.error('Erreur lors du chargement des stories:', err);
+      setError(err.message || 'Erreur lors du chargement des stories');
+      setToastMessage(`Erreur: ${err.message || 'Impossible de charger les stories'}`);
+      setToastColor('danger');
+      setShowToast(true);
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const loadNearbyStories = async (latitude: number, longitude: number) => {
+
+  const handleStoryMarkerClick = (story: Story) => {
+    setSelectedStory(story);
+    setShowStoryModal(true);
+  };
+
+  const handleAddReaction = async (emoji: string): Promise<void> => {
+    if (!selectedStory) return;
+    setShowReactionModal(false);
+
     try {
-      // Récupérer les stories à proximité
-      const nearbyStories = await storyService.getNearbyStories(latitude, longitude, 5000);
-      setStories(nearbyStories);
-      
-      // Ajouter des marqueurs pour chaque story
-      if (googleMapRef.current) {
-        for (const story of nearbyStories) {
-          await googleMapRef.current.addMarker({
-            coordinate: { 
-              lat: story.location.latitude, 
-              lng: story.location.longitude 
-            },
-            title: story.userId.username,
-            iconUrl: 'assets/story-marker.png'
-          });
-        }
-      }
-    } catch (err) {
-      console.error('Erreur lors du chargement des stories:', err);
-      setError('Impossible de charger les stories à proximité.');
+      await storyService.addReaction(selectedStory.id, emoji);
+
+      // Mettre à jour l'état local
+      const updatedStory = {
+        ...selectedStory,
+        reactions: [
+          ...selectedStory.reactions,
+          {
+            userId: user!.id,
+            emoji,
+            createdAt: new Date().toISOString()
+          }
+        ]
+      };
+
+      setSelectedStory(updatedStory);
+      setToastMessage('Réaction ajoutée');
+      setToastColor('success');
+      setShowToast(true);
+    } catch (err: any) {
+      console.error('Erreur lors de l\'ajout de la réaction:', err);
+      setToastMessage(`Erreur: ${err.message || 'Impossible d\'ajouter la réaction'}`);
+      setToastColor('danger');
+      setShowToast(true);
     }
   };
-  
-  const handleCameraCapture = async () => {
+
+  const handleAddComment = async (): Promise<void> => {
+    if (!selectedStory || !comment.trim()) return;
+    setShowCommentModal(false);
+
     try {
-      // Capturer une photo ou vidéo
-      const image = await Camera.getPhoto({
+      const newComment = await storyService.addComment(selectedStory.id, comment);
+
+      // Mettre à jour l'état local
+      const updatedStory = {
+        ...selectedStory,
+        comments: [
+          ...selectedStory.comments,
+          {
+            userId: {
+              id: user!.id,
+              username: user!.username,
+              profilePicture: user!.profilePicture
+            },
+            content: comment,
+            createdAt: new Date().toISOString()
+          }
+        ]
+      };
+
+      setSelectedStory(updatedStory);
+      setComment('');
+      setToastMessage('Commentaire ajouté');
+      setToastColor('success');
+      setShowToast(true);
+    } catch (err: any) {
+      console.error('Erreur lors de l\'ajout du commentaire:', err);
+      setToastMessage(`Erreur: ${err.message || 'Impossible d\'ajouter le commentaire'}`);
+      setToastColor('danger');
+      setShowToast(true);
+    }
+  };
+
+  const handleTakePhoto = async (): Promise<void> => {
+    try {
+      const photo = await Camera.getPhoto({
         quality: 90,
-        allowEditing: false,
+        allowEditing: true,
         resultType: CameraResultType.Uri,
         source: CameraSource.Camera
       });
-      
-      // Rediriger vers la page de création de story avec l'image capturée
-      // Dans une application réelle, nous passerions l'image à la page de création
-      console.log('Image capturée:', image);
-      
-      // Simuler une redirection
-      alert('Fonctionnalité de création de story à implémenter');
-    } catch (err) {
-      console.error('Erreur lors de la capture:', err);
+
+      if (photo.webPath) {
+        setCapturedImage(photo.webPath);
+      }
+    } catch (err: any) {
+      console.error('Erreur lors de la prise de photo:', err);
+      setToastMessage(`Erreur: ${err.message || 'Impossible de prendre une photo'}`);
+      setToastColor('danger');
+      setShowToast(true);
     }
   };
-  
-  const handleAddReaction = async (emoji: string) => {
-    if (!selectedStory || !user) return;
-    
+
+  const handleCreateStory = async (): Promise<void> => {
+    if (!capturedImage) return;
+    setIsCreatingStory(true);
+
     try {
-      await storyService.addReaction(selectedStory.id, emoji);
-      
-      // Mettre à jour l'état local
-      const updatedStory = { 
-        ...selectedStory,
-        reactions: [
-          ...selectedStory.reactions.filter(r => r.userId !== user.id),
-          { userId: user.id, emoji }
-        ]
+      // Obtenir la position actuelle
+      const position = await Geolocation.getCurrentPosition();
+      const { latitude, longitude } = position.coords;
+
+      // Convertir l'image en fichier
+      const response = await fetch(capturedImage);
+      const blob = await response.blob();
+      const file = new File([blob], 'story-image.jpg', { type: 'image/jpeg' });
+
+      // Télécharger le média
+      const uploadResult = await storyService.uploadStoryMedia(file);
+
+      // Créer la story
+      const storyData = {
+        mediaUrl: uploadResult.mediaUrl,
+        mediaType: uploadResult.mediaType,
+        latitude,
+        longitude,
+        caption: storyCaption
       };
       
-      setSelectedStory(updatedStory);
-      setShowReactionSheet(false);
-    } catch (err) {
-      console.error('Erreur lors de l\'ajout de la réaction:', err);
-      alert('Impossible d\'ajouter la réaction');
+      // Appel à l'API pour créer la story
+      const newStory = await storyService.createStory(storyData);
+      
+      // Réinitialiser les états
+      setCapturedImage(null);
+      setStoryCaption('');
+      setShowCameraModal(false);
+      
+      // Ajouter la story à la liste
+      setStories([newStory, ...stories]);
+      
+      setToastMessage('Story créée avec succès');
+      setToastColor('success');
+      setShowToast(true);
+    } catch (err: any) {
+      console.error('Erreur lors de la création de la story:', err);
+      setToastMessage(`Erreur: ${err.message || 'Impossible de créer la story'}`);
+      setToastColor('danger');
+      setShowToast(true);
+    } finally {
+      setIsCreatingStory(false);
     }
   };
-  
-  const handleAddComment = async () => {
-    if (!selectedStory || !user || !comment.trim()) return;
-    
+
+  const handleLocateMe = async () => {
     try {
-      const newComment = await storyService.addComment(selectedStory.id, comment);
+      const position = await Geolocation.getCurrentPosition();
+      const { latitude, longitude } = position.coords;
       
-      // Mettre à jour l'état local
-      const updatedStory = { 
-        ...selectedStory,
-        comments: [...selectedStory.comments, newComment]
-      };
-      
-      setSelectedStory(updatedStory);
-      setComment('');
-      setShowCommentModal(false);
-    } catch (err) {
-      console.error('Erreur lors de l\'ajout du commentaire:', err);
-      alert('Impossible d\'ajouter le commentaire');
+      if (mapRef.current) {
+        mapRef.current.setView([latitude, longitude], 15);
+      }
+    } catch (err: any) {
+      console.error('Erreur lors de la géolocalisation:', err);
+      setToastMessage(`Erreur: ${err.message || 'Impossible d\'obtenir votre position'}`);
+      setToastColor('danger');
+      setShowToast(true);
     }
   };
-  
-  const getUserReaction = () => {
-    if (!selectedStory || !user) return null;
-    
-    const userReaction = selectedStory.reactions.find(r => r.userId === user.id);
-    return userReaction ? userReaction.emoji : null;
-  };
-  
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-  
+
   return (
     <IonPage>
       <IonHeader>
@@ -300,192 +285,256 @@ const StoryMap: React.FC = () => {
       <IonContent fullscreen>
         <IonLoading isOpen={isLoading} message="Chargement de la carte..." />
         
-        {error && (
-          <IonText color="danger" className="ion-text-center ion-padding">
-            <p>{error}</p>
-          </IonText>
-        )}
-        
+        <IonToast
+          isOpen={showToast}
+          onDidDismiss={() => setShowToast(false)}
+          message={toastMessage}
+          duration={3000}
+          position="bottom"
+          color={toastColor}
+        />
+
         <div className="map-container">
-          <capacitor-google-map ref={mapRef} style={{ 
-            display: 'block',
-            width: '100%',
-            height: '100%'
-          }}></capacitor-google-map>
+          <MapContainer 
+            center={mapCenter} 
+            zoom={mapZoom} 
+            style={{ height: '100%', width: '100%' }}
+            whenCreated={(map) => { mapRef.current = map; }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <LocationMarker onLocationFound={handleLocationFound} />
+            
+            {stories.map((story ) => (
+              <Marker 
+                key={story.id}
+                position={[story.location.latitude, story.location.longitude]}
+                eventHandlers={{
+                  click: () => handleStoryMarkerClick(story)
+                }}
+                icon={new L.Icon({
+                  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                  iconSize: [25, 41],
+                  iconAnchor: [12, 41],
+                  popupAnchor: [1, -34],
+                  shadowSize: [41, 41]
+                } )}
+              >
+                <Popup>
+                  <strong>{story.userId.username}</strong>
+                  <p>{story.caption || 'Story'}</p>
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
         </div>
-        
+
         <IonFab vertical="bottom" horizontal="center" slot="fixed">
-          <IonFabButton onClick={handleCameraCapture} aria-label="Prendre une photo ou vidéo">
+          <IonFabButton onClick={() => setShowCameraModal(true)}>
             <IonIcon icon={camera} />
           </IonFabButton>
         </IonFab>
-        
+
+        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+          <IonFabButton onClick={handleLocateMe}>
+            <IonIcon icon={locate} />
+          </IonFabButton>
+        </IonFab>
+
         {/* Modal pour afficher une story */}
         <IonModal isOpen={showStoryModal} onDidDismiss={() => setShowStoryModal(false)}>
-          <IonHeader>
-            <IonToolbar>
-              <IonButtons slot="start">
-                <IonButton onClick={() => setShowStoryModal(false)}>
-                  <IonIcon icon={closeCircle} />
-                </IonButton>
-              </IonButtons>
-              <IonTitle>Story</IonTitle>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent>
-            {selectedStory && (
-              <div className="story-container">
-                <div className="story-header">
-                  <IonAvatar>
-                    <img 
-                      src={selectedStory.userId.profilePicture || 'https://i.pravatar.cc/150?u=' + selectedStory.userId.id} 
-                      alt={`Photo de ${selectedStory.userId.username}`} 
-                    />
-                  </IonAvatar>
-                  <div className="story-user-info">
-                    <h2>{selectedStory.userId.username}</h2>
-                    <p className="story-time">
-                      <IonIcon icon={timeOutline} />
-                      <span>{timeLeft}</span>
-                    </p>
-                  </div>
-                  <div className="story-location">
-                    <IonIcon icon={locationOutline} />
-                  </div>
-                </div>
-                
-                <div className="story-media">
-                  {selectedStory.mediaType === 'image' ? (
-                    <img src={selectedStory.mediaUrl} alt="Story" />
-                  ) : (
-                    <video src={selectedStory.mediaUrl} controls />
-                  )}
-                </div>
+          {selectedStory && (
+            <>
+              <IonHeader>
+                <IonToolbar>
+                  <IonTitle>{selectedStory.userId.username}</IonTitle>
+                  <IonButton slot="end" fill="clear" onClick={() => setShowStoryModal(false)}>
+                    Fermer
+                  </IonButton>
+                </IonToolbar>
+              </IonHeader>
+              <IonContent className="ion-padding">
+                <img 
+                  src={selectedStory.mediaUrl} 
+                  alt="Story" 
+                  className="story-image"
+                  loading="lazy"
+                />
                 
                 {selectedStory.caption && (
-                  <div className="story-caption">
-                    <p>{selectedStory.caption}</p>
-                  </div>
+                  <IonText>
+                    <p className="story-caption">{selectedStory.caption}</p>
+                  </IonText>
                 )}
                 
                 <div className="story-actions">
-                  <IonButton 
-                    fill="clear" 
-                    onClick={() => setShowReactionSheet(true)}
-                    aria-label="Réagir à la story"
-                  >
-                    <IonIcon slot="start" icon={happyOutline} />
-                    {getUserReaction() ? getUserReaction() : 'Réagir'}
+                  <IonButton fill="clear" onClick={() => setShowReactionModal(true)}>
+                    <IonIcon slot="start" icon={heart} />
+                    {selectedStory.reactions.length > 0 && (
+                      <span>{selectedStory.reactions.length}</span>
+                    )}
                   </IonButton>
                   
-                  <IonButton 
-                    fill="clear" 
-                    onClick={() => setShowCommentModal(true)}
-                    aria-label="Commenter la story"
-                  >
-                    <IonIcon slot="start" icon={chatbubbleOutline} />
-                    Commenter
+                  <IonButton fill="clear" onClick={() => setShowCommentModal(true)}>
+                    <IonIcon slot="start" icon={chatbubble} />
+                    {selectedStory.comments.length > 0 && (
+                      <span>{selectedStory.comments.length}</span>
+                    )}
+                  </IonButton>
+                  
+                  <IonButton fill="clear">
+                    <IonIcon slot="start" icon={share} />
                   </IonButton>
                 </div>
                 
-                <div className="story-stats">
-                  {selectedStory.reactions.length > 0 && (
-                    <div className="reactions-summary">
-                      <p>
-                        {selectedStory.reactions.slice(0, 3).map(r => r.emoji).join(' ')}
-                        {selectedStory.reactions.length > 3 && ` +${selectedStory.reactions.length - 3}`}
-                      </p>
-                    </div>
-                  )}
-                  
-                  {selectedStory.comments.length > 0 && (
-                    <div className="comments-count">
-                      <IonBadge color="light">{selectedStory.comments.length} commentaires</IonBadge>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="story-comments">
-                  <h3>Commentaires</h3>
-                  {selectedStory.comments.length === 0 ? (
-                    <p className="no-comments">Aucun commentaire pour le moment</p>
-                  ) : (
-                    selectedStory.comments.map((comment, index) => (
-                      <div className="comment" key={index}>
-                        <IonAvatar>
-                          <img 
-                            src={comment.userId.profilePicture || 'https://i.pravatar.cc/150?u=' + comment.userId.id} 
-                            alt={`Photo de ${comment.userId.username}`} 
-                          />
-                        </IonAvatar>
-                        <div className="comment-content">
-                          <div className="comment-header">
-                            <h4>{comment.userId.username}</h4>
-                            <span className="comment-time">{formatDate(comment.createdAt)}</span>
-                          </div>
-                          <p>{comment.content}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
+                {selectedStory.comments.length > 0 && (
+                  <div className="story-comments">
+                    <IonCardTitle className="section-title">Commentaires</IonCardTitle>
+                    <IonList>
+                      {selectedStory.comments.map((comment, index) => (
+                        <IonItem key={index}>
+                          <IonAvatar slot="start">
+                            <img 
+                              src={comment.userId.profilePicture || `https://i.pravatar.cc/150?u=${comment.userId.id}`} 
+                              alt={comment.userId.username}
+                              loading="lazy"
+                            />
+                          </IonAvatar>
+                          <IonLabel>
+                            <h3>{comment.userId.username}</h3>
+                            <p>{comment.content}</p>
+                            <p className="comment-time">
+                              {new Date(comment.createdAt ).toLocaleString()}
+                            </p>
+                          </IonLabel>
+                        </IonItem>
+                      ))}
+                    </IonList>
+                  </div>
+                )}
+              </IonContent>
+            </>
+          )}
+        </IonModal>
+
+        {/* Modal pour ajouter une réaction */}
+        <IonModal isOpen={showReactionModal} onDidDismiss={() => setShowReactionModal(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Ajouter une réaction</IonTitle>
+              <IonButton slot="end" fill="clear" onClick={() => setShowReactionModal(false)}>
+                Annuler
+              </IonButton>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <div className="emoji-grid">
+              {['❤️', '👍', '😂', '😮', '😢', '😡'].map((emoji) => (
+                <IonButton 
+                  key={emoji} 
+                  fill="clear" 
+                  className="emoji-button"
+                  onClick={() => handleAddReaction(emoji)}
+                >
+                  {emoji}
+                </IonButton>
+              ))}
+            </div>
           </IonContent>
         </IonModal>
-        
+
         {/* Modal pour ajouter un commentaire */}
         <IonModal isOpen={showCommentModal} onDidDismiss={() => setShowCommentModal(false)}>
           <IonHeader>
             <IonToolbar>
-              <IonButtons slot="start">
-                <IonButton onClick={() => setShowCommentModal(false)}>
-                  Annuler
-                </IonButton>
-              </IonButtons>
               <IonTitle>Ajouter un commentaire</IonTitle>
-              <IonButtons slot="end">
-                <IonButton 
-                  onClick={handleAddComment}
-                  disabled={!comment.trim()}
-                  strong={true}
-                >
-                  Publier
-                </IonButton>
-              </IonButtons>
+              <IonButton slot="end" fill="clear" onClick={() => setShowCommentModal(false)}>
+                Annuler
+              </IonButton>
             </IonToolbar>
           </IonHeader>
-          <IonContent>
-            <div className="comment-form">
-              <IonTextarea
-                placeholder="Écrivez un commentaire..."
-                value={comment}
-                onIonChange={e => setComment(e.detail.value || '')}
-                autoGrow={true}
-                rows={4}
-                className="comment-textarea"
-              />
-            </div>
+          <IonContent className="ion-padding">
+            <IonTextarea
+              placeholder="Écrivez votre commentaire..."
+              value={comment}
+              onIonChange={e => setComment(e.detail.value || '')}
+              rows={6}
+              className="comment-textarea"
+            />
+            <IonButton 
+              expand="block" 
+              onClick={handleAddComment}
+              disabled={!comment.trim()}
+            >
+              Publier
+            </IonButton>
           </IonContent>
         </IonModal>
-        
-        {/* Action sheet pour les réactions */}
-        <IonActionSheet
-          isOpen={showReactionSheet}
-          onDidDismiss={() => setShowReactionSheet(false)}
-          header="Réagir à la story"
-          buttons={[
-            ...EMOJI_OPTIONS.map(option => ({
-              text: `${option.value} ${option.text}`,
-              icon: option.icon,
-              handler: () => handleAddReaction(option.value)
-            })),
-            {
-              text: 'Annuler',
-              role: 'cancel'
-            }
-          ]}
-        />
+
+        {/* Modal pour créer une story */}
+        <IonModal isOpen={showCameraModal} onDidDismiss={() => {
+          setShowCameraModal(false);
+          setCapturedImage(null);
+          setStoryCaption('');
+        }}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Créer une story</IonTitle>
+              <IonButton slot="end" fill="clear" onClick={() => {
+                setShowCameraModal(false);
+                setCapturedImage(null);
+                setStoryCaption('');
+              }}>
+                Annuler
+              </IonButton>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            {!capturedImage ? (
+              <IonButton expand="block" onClick={handleTakePhoto}>
+                <IonIcon slot="start" icon={camera} />
+                Prendre une photo
+              </IonButton>
+            ) : (
+              <>
+                <div className="captured-image-container">
+                  <img 
+                    src={capturedImage} 
+                    alt="Captured" 
+                    className="captured-image"
+                    loading="lazy"
+                  />
+                  <IonButton 
+                    fill="clear" 
+                    className="retake-button"
+                    onClick={() => setCapturedImage(null)}
+                  >
+                    Reprendre
+                  </IonButton>
+                </div>
+                
+                <IonTextarea
+                  placeholder="Ajouter une légende..."
+                  value={storyCaption}
+                  onIonChange={e => setStoryCaption(e.detail.value || '')}
+                  rows={4}
+                  className="caption-textarea"
+                />
+                
+                <IonButton 
+                  expand="block" 
+                  onClick={handleCreateStory}
+                  disabled={isCreatingStory}
+                >
+                  {isCreatingStory ? 'Création en cours...' : 'Publier la story'}
+                </IonButton>
+              </>
+            )}
+          </IonContent>
+        </IonModal>
       </IonContent>
     </IonPage>
   );

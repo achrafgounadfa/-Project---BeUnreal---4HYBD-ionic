@@ -41,6 +41,9 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import './theme/global.css';
+import 'leaflet/dist/leaflet.css';
+import './utils/leaflet-fixes';
+
 
 setupIonicReact();
 
